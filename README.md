@@ -38,7 +38,7 @@ Put the following files into the workspace directory:
 
 You need a batch file (Windows) / shell script (Unix) to build the image. Basically, it should contain the following:
 
-<pre><virtualMachine> {image} -headless -pcl JenkinsImage {other parcels} -loadBundles {some bundles} -loadPackages {some packages} -saveAs {targetImage}
+<pre>{virtualMachin}> {image} -headless -pcl JenkinsImage {other parcels} -loadBundles {some bundles} -loadPackages {some packages} -saveAs {targetImage}
 </pre>
 
 *   `-loadBundles` specifies the bundles that should be loaded from the Store repository. Each bundle name can contain an optional version pattern: Name(VersionPattern), e.g. AutoComplete(7.9 *). Remember to use quotes when necessary.
