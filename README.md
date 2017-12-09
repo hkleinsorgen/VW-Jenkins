@@ -105,18 +105,19 @@ You can now start the job to build an image and run all tests - enjoy your fresh
 
 ### Example
 
-<pre><span class="codecomment">REM clean up files of previous builds</span>
+````batch
+REM clean up files of previous builds
 del *.log
 del *.im
 del *.cha
-<span class="codecomment">REM copy the development image</span>
+REM copy the development image
 set source=..\..\dev-image\workspace\dev-image
 copy "%source%.im" temp.im
 copy "%source%.cha" temp.cha
-<span class="codecomment">REM build</span>
+REM build
 %VisualWorksHome%\bin\win\vwntconsole.exe -noherald temp.im -headless -pcl JenkinsRuntimePackager -rtp seaside-server.rtp
-<span class="codecomment">REM clean up temporary stuff</span>
+REM clean up temporary stuff
 del temp.*
-<span class="codecomment">REM test</span>
+REM test
 %VisualWorksHome%\bin\win\vwntconsole.exe -noherald seaside-server.im -headless -pcl JenkinsUnitTester -test seaside-server.xml
-</pre>
+````
