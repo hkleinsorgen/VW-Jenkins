@@ -98,7 +98,7 @@ You can now start the job to build an image and run all tests - enjoy your fresh
 *   Define a batch/shell build step. Basically you need to load JenkinsRuntimePackager and specify the RTP file via the command line option `-rtp`.
 
     ````
-    {virtualMachine} {image} -headless -pcl JenkinsRuntimePackager -rtp <RTP options file>
+    {virtualMachine} {image} -headless -pcl JenkinsRuntimePackager -rtp {optionsFile.rtp}
     ````
     
 *   The runtime image can be tested, too, by loading JenkinsUnitTester and specifying a test result filename: -test {resultFilename}
