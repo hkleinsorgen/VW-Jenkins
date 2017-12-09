@@ -4,7 +4,7 @@ You need
 
 *   Jenkins ([Jenkins project page](http://www.jenkins-ci.org))
 *   Apache Tomcat (or any other servlet engine)
-*   The Jenkins automation packages from Cincoms public repository (JenkinsAutomation, JenkinsImage, JenkinsUnitTester, JenkinsRuntimePackager)
+*   The Jenkins automation parcels / packages  (JenkinsAutomation, JenkinsImage, JenkinsUnitTester, JenkinsRuntimePackager), either from Github or from the public store repository
 *   A Store repository
 
 This instruction assumes that Jenkins is installed on a machine running Windows. It should be possible to adapt it to other OS, but I have not done that yet.
