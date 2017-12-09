@@ -60,20 +60,21 @@ Another package in the public repository, `CodeCriticTest`, performs code critic
 
 ### Example
 
-<pre><span class="codecomment">REM clean up files of previous builds</span>
+````batch
+REM clean up files of previous builds
 del %JOB_NAME%.*
 del *.log
-<span class="codecomment">REM create a temporary image</span>
+REM create a temporary image
 copy %VisualWorksHome%\image\visual.im temp.im
-<span class="codecomment">REM build</span>
+REM build
 set parcels=RBCodeHighlighting RBTabbedToolsets JenkinsImage
 set bundles=InfoVis 
 set packages=JenkinsUnitTester "AutoComplete(7.9 *)" Windows7LookPolicy((7.9).*) Windows7LookPolicyAutoSelect
 set vm=%VisualWorksHome%\bin\win\vwntconsole.exe
 %vm% temp.im -headless -pcl %parcels% -loadBundles %bundles% -loadPackages %packages% -saveAs %JOB_NAME%
-<span class="codecomment">REM clean up temporary stuff</span>
+REM clean up temporary stuff
 del temp.*
-</pre>
+````
 
 ## Configure the job
 
