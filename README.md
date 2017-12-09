@@ -42,7 +42,7 @@ You need a batch file (Windows) / shell script (Unix) to build the image. Basica
 {virtualMachine} {image} -headless -pcl JenkinsImage {other parcels} -loadBundles {some bundles} -loadPackages {some packages} -saveAs {targetImage}
 ````
 
-*   `-loadBundles` specifies the bundles that should be loaded from the Store repository. Each bundle name can contain an optional version pattern: Name(VersionPattern), e.g. AutoComplete(7.9 *). Remember to use quotes when necessary.
+*   `-loadBundles` specifies the bundles that should be loaded from the Store repository. Each bundle name can contain an optional version pattern: `Name(VersionPattern)`, e.g. `AutoComplete(7.9 *)`. Remember to use quotes when necessary (names containing spaces etc.).
 *   `-loadPackages` specifies the packages that should be loaded from the Store repository. May contain a version pattern, too
 *   `-saveAs` specifies the name of the image (without file extension). It's convenient to use the environment variable `JOB_NAME` of Jenkins.
 *   It is probably a good idea to copy the source image to a temporary image, to avoid inflating the changes files of the source image
