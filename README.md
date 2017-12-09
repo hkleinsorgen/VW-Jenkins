@@ -38,8 +38,9 @@ Put the following files into the workspace directory:
 
 You need a batch file (Windows) / shell script (Unix) to build the image. Basically, it should contain the following:
 
-<pre>{virtualMachine} {image} -headless -pcl JenkinsImage {other parcels} -loadBundles {some bundles} -loadPackages {some packages} -saveAs {targetImage}
-</pre>
+````
+{virtualMachine} {image} -headless -pcl JenkinsImage {other parcels} -loadBundles {some bundles} -loadPackages {some packages} -saveAs {targetImage}
+````
 
 *   `-loadBundles` specifies the bundles that should be loaded from the Store repository. Each bundle name can contain an optional version pattern: Name(VersionPattern), e.g. AutoComplete(7.9 *). Remember to use quotes when necessary.
 *   `-loadPackages` specifies the packages that should be loaded from the Store repository. May contain a version pattern, too
@@ -96,9 +97,10 @@ You can now start the job to build an image and run all tests - enjoy your fresh
 *   Put the parcel JenkinsRuntimePackager and an RTP options file into the workspace directory
 *   Define a batch/shell build step. Basically you need to load JenkinsRuntimePackager and specify the RTP file via the command line option `-rtp`.
 
-    <pre><virtualMachine> {image} -headless -pcl JenkinsRuntimePackager -rtp <RTP options file>
-    </pre>
-
+    ````
+    {virtualMachine} {image} -headless -pcl JenkinsRuntimePackager -rtp <RTP options file>
+    ````
+    
 *   The runtime image can be tested, too, by loading JenkinsUnitTester and specifying a test result filename: -test {resultFilename}
 *   Add a post build action - `Archive the artifacts` - specifiy the name of the runtime image
 *   Add a post build action - `Publish JUnit test result report` - specify {testResultFilename.xml}
