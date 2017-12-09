@@ -11,21 +11,21 @@ This instruction assumes that Jenkins is installed on a machine running Windows.
 
 ## Install Jenkins
 
-Download and install Jenkins.war as usual. You might want to set HUDSON_HOME in web.xml to specify the configuration/build directory used by Jenkins. After installation, open the Jenkins page and go to _Manage Jenkins_ -> _Configure System_. Add three global properties:
+Download and install Jenkins.war as usual. You might want to set HUDSON_HOME in web.xml to specify the configuration/build directory used by Jenkins. After installation, open the Jenkins page and go to `Manage Jenkins > Configure System`. Add three global properties:
 
-*   _VisualWorksConfigurationDirectory_ - A directory containing configuration files. Export your Store respositories into this directory (as respositories.xml)
-*   _VisualWorksRepository_ - The name of the _profile_ of the Store repository that contains your packages.
-*   _VisualWorksStoreParcel_ - The name of the parcel of the Store connection (e.g. "StoreForPostgreSQL").
+*   `VisualWorksConfigurationDirectory` - A directory containing configuration files. Export your Store respositories into this directory (as respositories.xml)
+*   `VisualWorksRepository` - The name of the profile of the Store repository that contains your packages.
+*   `VisualWorksStoreParcel` - The name of the parcel of the Store connection (e.g. "StoreForPostgreSQL").
 
 You might want to define additional variables, for example
 
-*   _VisualWorksHome_ - The VisualWorks home directory
+*   `VisualWorksHome` - The VisualWorks home directory
 
 ## Create a job
 
-For each image, create a new job as _free-style software project_.
+For each image, create a new job as `free-style software project`.
 
-You now need to put some files into the _workspace_. Jenkins does not create a workspace directory automatically, so build the non-configured job once. Jenkins will create a workspace directory %HUDSON_HOME%\jobs\%JOB_NAME%\workspace.
+You now need to put some files into the `workspace`. Jenkins does not create a workspace directory automatically, so build the non-configured job once. Jenkins will create a workspace directory `%HUDSON_HOME%\jobs\%JOB_NAME%\workspace`.
 
 Put the following files into the workspace directory:
 
@@ -38,25 +38,25 @@ Put the following files into the workspace directory:
 
 You need a batch file (Windows) / shell script (Unix) to build the image. Basically, it should contain the following:
 
-<pre><virtualMachine> <image> -headless -pcl JenkinsImage <other parcels> -loadBundles <some bundles> -loadPackages <some packages> -saveAs <imageName>
+<pre><virtualMachine> {image} -headless -pcl JenkinsImage {other parcels} -loadBundles {some bundles} -loadPackages {some packages} -saveAs {targetImage}
 </pre>
 
-*   _-loadBundles_ specifies the bundles that should be loaded from the Store repository. Each bundle name can contain an optional version pattern: Name(VersionPattern), e.g. AutoComplete(7.9 *). Remember to use quotes when necessary.
-*   _-loadPackages_ specifies the packages that should be loaded from the Store repository. May contain a version pattern, too
-*   _-saveAs_ specifies the name of the image (without file extension). It's convenient to use the environment variable _JOB_NAME_ of Jenkins.
+*   `-loadBundles` specifies the bundles that should be loaded from the Store repository. Each bundle name can contain an optional version pattern: Name(VersionPattern), e.g. AutoComplete(7.9 *). Remember to use quotes when necessary.
+*   `-loadPackages` specifies the packages that should be loaded from the Store repository. May contain a version pattern, too
+*   `-saveAs` specifies the name of the image (without file extension). It's convenient to use the environment variable `JOB_NAME` of Jenkins.
 *   It is probably a good idea to copy the source image to a temporary image, to avoid inflating the changes files of the source image
 
 ### Settings
 
-JenkinsImage automatically loads settings of all available settings domains if the workspace directory contains an exported XML file , e.g. "VisualWorksSettings.xml".
+JenkinsImage automatically loads settings of all available settings domains if the workspace directory contains an exported XML file , e.g. `VisualWorksSettings.xml`.
 
 ### Unit tests
 
-To run test cases and see the test results in Jenkins, you need to load the package _JenkinsUnitTester_. Simply add it to the list of packages to load (if you have published it in your repository), or load it as parcel via -pcl (it must appear before "JenkinsImage").
+To run test cases and see the test results in Jenkins, you need to load the package `JenkinsUnitTester`. Simply add it to the list of packages to load (if you have published it in your repository), or load it as parcel via -pcl (it must appear before "JenkinsImage").
 
-JenkinsUnitTester performs all _SUnitToo_ tests that are loaded in the image. The test results will be saved as a JUnit compatible file named <image name>.xml in the workspace directory.
+JenkinsUnitTester performs all SUnitToo tests that are loaded in the image. The test results will be saved as a JUnit compatible file named {imageName}.xml in the workspace directory.
 
-Another package in the public repository, _CodeCriticTest_, performs code critic (aka Lint) checks as a test case. It will check all 'Bugs' rules.
+Another package in the public repository, `CodeCriticTest`, performs code critic (aka Lint) checks as a test case. It will check all 'Bugs' rules.
 
 ### Example
 
@@ -79,28 +79,28 @@ del temp.*
 
 At least the following elements of the job must be configured:
 
-*   _Build_ - Add the Windows batch/shell command desribed above as build step. It will be executed in the workspace directory
-*   Post build actions - _Archive the artifacts_ - specifiy the name of the image and the changes file, separated by a comma
-*   Post build actions - _Publish JUnit test result report_ - <_image name_>.xml
+*   `Build` - Add the Windows batch/shell command desribed above as build step. It will be executed in the workspace directory
+*   Post build actions - `Archive the artifacts` - specifiy the name of the image and the changes file, separated by a comma
+*   Post build actions - `Publish JUnit test result report` - specify the name of the JUnit results file {imageName.xml}
 
-It's useful to add a build trigger - _Build periodically_ and to _Discard Old Builds_
+It's useful to add a build trigger - `Build periodically` and to `Discard Old Builds`
 
 You can now start the job to build an image and run all tests - enjoy your fresh, tested images!
 
 ## Create a runtime image
 
-_JenkinsRuntimePackager_ allows to automate building images with the runtime packager.
+`JenkinsRuntimePackager` allows to automate building images with the runtime packager.
 
-*   Create a new job as _free-style software project_
+*   Create a new job as `free-style software project`
 *   Put the parcel JenkinsRuntimePackager and an RTP options file into the workspace directory
-*   Define a batch/shell build step. Basically you need to load JenkinsRuntimePackager and specify the RTP file via the command line option _-rtp_.
+*   Define a batch/shell build step. Basically you need to load JenkinsRuntimePackager and specify the RTP file via the command line option `-rtp`.
 
-    <pre><virtualMachine> <image> -headless -pcl JenkinsRuntimePackager -rtp <RTP options file>
+    <pre><virtualMachine> {image} -headless -pcl JenkinsRuntimePackager -rtp <RTP options file>
     </pre>
 
-*   The runtime image can be tested, too, by loading JenkinsUnitTester and specifying a test result filename: _-test_ <result filename>
-*   Add a post build action - _Archive the artifacts_ - specifiy the name of the runtime image
-*   Add a post build action - _Publish JUnit test result report_ - specify <_test result filename.xml>_
+*   The runtime image can be tested, too, by loading JenkinsUnitTester and specifying a test result filename: -test {resultFilename}
+*   Add a post build action - `Archive the artifacts` - specifiy the name of the runtime image
+*   Add a post build action - `Publish JUnit test result report` - specify {testResultFilename.xml}
 
 ### Example
 
