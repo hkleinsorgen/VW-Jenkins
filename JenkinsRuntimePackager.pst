@@ -1,0 +1,178 @@
+<?xml version="1.0"?>
+
+<st-source>
+<!-- 
+Name: JenkinsRuntimePackager
+Notice: Licensed under the MIT license
+
+Copyright (c) 2012 Holger Kleinsorgen
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+Comment: Builds a runtime image using RuntimePackager.
+
+Documentation: http://dl.dropbox.com/u/21555916/documentation/jenkins.html
+Contact: h . kleinsorgen -at- gmail . com
+Licensed under the MIT license (see Copyright)
+DbIdentifier: psql_public_cst_2007
+DbTrace: 84592
+DbUsername: klnsrgn
+DbVersion: 1
+DevelopmentPrerequisites: #(#(#any 'JenkinsAutomation' '') #(#any 'RuntimePackager' ''))
+PackageName: JenkinsRuntimePackager
+Parcel: #('JenkinsRuntimePackager')
+ParcelDirectory: JenkinsRuntimePackager
+PrerequisiteDescriptions: #(#(#name 'JenkinsAutomation' #componentType #package) #(#name 'RuntimePackager' #componentType #package))
+PrerequisiteParcels: #(#('JenkinsAutomation' '') #('RuntimePackager' ''))
+PrintStringCache: (1,klnsrgn)
+Version: 1
+Post-Load Block: 
+	[:package |
+	Jenkins.JenkinsRuntimePackager postLoadBuild
+]
+Date: 10:43:36 AM December 9, 2017
+ -->
+<time-stamp>From VisualWorks®, 8.1.1 of March 10, 2016 on December 9, 2017 at 10:43:36 AM</time-stamp>
+
+
+<do-it>(Dialog confirm: 'You are filing-in a Parcel source file!\\While this is possible it will not have\the same effect as loading the parcel.\None of the Parcel''s prerequisites will\be loaded and none of its load actions\will be performed.\\Are you sure you want to file-in?' withCRs) ifFalse: [self error: 'Parcel file-in abandoned.  Choose terminate or close.']</do-it>
+
+<class>
+<name>JenkinsRuntimePackager</name>
+<environment>Jenkins</environment>
+<super>Core.Object</super>
+<private>false</private>
+<indexed-type>none</indexed-type>
+<inst-vars></inst-vars>
+<class-inst-vars></class-inst-vars>
+<imports>
+			RuntimePackager.*
+			</imports>
+<category></category>
+<attributes>
+<package>JenkinsRuntimePackager</package>
+</attributes>
+</class>
+
+<comment>
+<class-id>Jenkins.JenkinsRuntimePackager</class-id>
+<body>Builds a runtime image using RuntimePackager.</body>
+</comment>
+
+<methods>
+<class-id>Jenkins.JenkinsRuntimePackager class</class-id> <category>configuration</category>
+
+<body package="JenkinsRuntimePackager">checkConfiguration	| optionsFilename |	optionsFilename := self optionsFilename.	optionsFilename isNil		ifTrue: [ self error: 'RTP options file not specified' ].	optionsFilename exists		ifFalse: [ 'Options file ' , optionsFilename asString , ' not found' ]</body>
+
+<body package="JenkinsRuntimePackager">optionsFilename	" Name of the RTP options file "	^ (Build argumentNamed: 'rtp' ifAbsent: [ nil ])		ifNotNil: [: optionsFilename | optionsFilename asFilename ]</body>
+</methods>
+
+<methods>
+<class-id>Jenkins.JenkinsRuntimePackager class</class-id> <category>building</category>
+
+<body package="JenkinsRuntimePackager">build	| packagerUI |	self checkConfiguration.	" RuntimePackager does not separate UI and packaging, so building an image headless is ugly "	packagerUI := RuntimeBuilderUI new.	packagerUI interactWithUser: false.	Build log: 'Loading parameters'.	packagerUI loadParametersFile: self optionsFilename.	Build log: 'Packaging runtime image'.	packagerUI jenkinsPackageRuntimeImage</body>
+</methods>
+
+<methods>
+<class-id>Jenkins.JenkinsRuntimePackager class</class-id> <category>private</category>
+
+<body package="JenkinsRuntimePackager">shouldBuild	^ Build buildID notNil and: [ self optionsFilename notNil ]</body>
+</methods>
+
+<methods>
+<class-id>Jenkins.JenkinsRuntimePackager class</class-id> <category>initialize-release</category>
+
+<body package="JenkinsRuntimePackager">postLoadBuild	self shouldBuild		ifTrue: [ self build ]</body>
+</methods>
+
+<methods>
+<class-id>RuntimePackager.RuntimeProgressNotifier class</class-id> <category>interface opening</category>
+
+<body package="JenkinsRuntimePackager">open	" Override: do not open a dialog "	^ self new</body>
+</methods>
+
+<methods>
+<class-id>RuntimePackager.RuntimeProgressNotifier</class-id> <category>actions</category>
+
+<body package="JenkinsRuntimePackager">close	" Override: no GUI  "</body>
+
+<body package="JenkinsRuntimePackager">raise	" Override: no GUI don't raise "</body>
+
+<body package="JenkinsRuntimePackager">show: aString	" Override: Transcript "	Transcript show: aString.</body>
+
+<body package="JenkinsRuntimePackager">tick	" Override: no GUI don't tick "</body>
+</methods>
+
+<methods>
+<class-id>RuntimePackager.RuntimeBuilderUI</class-id> <category>internals</category>
+
+<body package="JenkinsRuntimePackager">closeExtraWindows: deletedClasses	" Override: No GUI  "	| controllers extras |	WindowManager allInstancesDo: [: each | each purgeDeadWindows ].	controllers := ScheduledControllers scheduledControllers.	extras := controllers select: 				[: controller |					controller class isObsolete or: 						[	(deletedClasses includes: controller class) or: 								[	(deletedClasses includes: controller view class) or: 										[	(deletedClasses includes: controller model class)												or: [ deletedClasses includes: controller sensor class ] 										] 								] 						] 				].	extras isEmpty		ifFalse: [ extras do: [: controller | controller closeAndUnschedule ] ]</body>
+</methods>
+
+<methods>
+<class-id>RuntimePackager.RuntimeBuilderUI</class-id> <category>actions</category>
+
+<body package="JenkinsRuntimePackager">imagePrefix	| imageFilename imageName |	imageFilename := self options imagePath asFilename.	imageName := imageFilename tail.	^ imageName copyFrom: 1 to: imageName size - imageFilename extension size</body>
+
+<body package="JenkinsRuntimePackager">jenkinsPackageRuntimeImage	options skipScan		ifFalse: 		[	self traceMessages				ifFalse: [ ^ self ] 		].	self saveParcels		ifFalse: [ ^ self ].	self stripSystem</body>
+</methods>
+
+<methods>
+<class-id>RuntimePackager.RuntimeBuilderUI</class-id> <category>internals</category>
+
+<body package="JenkinsRuntimePackager">prepareToStripSystem	" Override: No GUI  "	| deletedClasses |	(tester notNil and: [ tester testInProgress ])		ifTrue: 		[	Transcript				show: ('A test is in progress.\' , 'It must be ended before performing this step') withCRs.			^ false 		].	" get the real set of classes to be deleted "	deletedClasses := keptItems allDeletedClasses.	" stay alive "	WindowManager noWindowBlock: [ : windowManager | ].	" close any extraneous windows"	self closeExtraWindows: deletedClasses.	"Disconnect from Store and remove debug hooks"	(RuntimeManager hiddenReferenceTo: 'Store.DbRegistry')		ifNotNil: [: registry | registry disconnect ].	(RuntimeManager hiddenReferenceTo: 'ProbedCompiledMethod')		ifNotNil: [: probe | probe revertAllProbedMethodsInSystem ].	" Close everything "	ScheduledControllers scheduledControllers do: [: controller | controller closeAndUnschedule ].	RuntimeManager runState: #aboutToSave.	" get final set of deleted classes and methods "	RuntimeManager deletedClasses: deletedClasses.	RuntimeManager deletedMethods: keptItems allDeletedMethods.	RuntimeManager deletedGlobals: keptItems deletedGlobals copy.	RuntimeManager deletedGlobals addAll: keptItems unreferencedGlobals.	RuntimeManager loadableClasses: options loadableClasses.	" setup runtime manager for exit/startup sequence "	RuntimeManager		strippingOptions: options strippingOptions;		errorNotifierClass: options errorNotifierClass;		imageDumperClass: options imageDumperClass;		errorLogPath: options errorLogPath;		imagePath: options imagePath;		startupClass: options startupClass;		startupMethod: options startupMethod;		memoryParams: memoryParams;		loadableParcels: options loadableParcels;		loadableNameSpaces: options loadableNameSpaces;		parcelsToUnload: options parcelsToUnload;		traceLevel: options traceLevel.	" install hooks so that all windows can be closed "	RuntimeManager installHooks.	" now that everything is set up, send the user defined message, if any"	self sendPrestripMessage.	" Remove as much of the UI as possible"	options cancel.	keptItems cancel.	tester notNil		ifTrue: [ tester cancel ].	memoryParams cancel.	ScheduledControllers scheduledControllers do: 		[: ctrl |			(ctrl model isKindOf: RuntimeBuilderAppModel)				ifTrue: [ ctrl closeNoTerminate ] 		].	ActiveApplication := nil.	self release.	options := keptItems := tester := memoryParams := nil.	RuntimeManager runState == #aboutToSave		ifTrue: 		[	"now go do the real work"			[ RuntimeManager createAndSaveFinalImage ] fork 		].	" done without error"	^ true</body>
+</methods>
+
+<do-it>"Imported Classes:"</do-it>
+
+<do-it>self error: 'Attempting to file-in parcel imports.  Choose terminate or close'</do-it>
+
+<class>
+<name>Object</name>
+<environment>Core</environment>
+<super></super>
+<private>false</private>
+<indexed-type>none</indexed-type>
+<inst-vars></inst-vars>
+<class-inst-vars></class-inst-vars>
+<imports></imports>
+<category>Kernel-Objects</category>
+<attributes>
+<package>Kernel-Objects</package>
+</attributes>
+</class>
+
+<class>
+<name>RuntimeProgressNotifier</name>
+<environment>RuntimePackager</environment>
+<super>UI.ApplicationModel</super>
+<private>false</private>
+<indexed-type>none</indexed-type>
+<inst-vars>progressCount text textWidget tickCount tickRate ended windowExtent progressString </inst-vars>
+<class-inst-vars></class-inst-vars>
+<imports></imports>
+<category>RuntimePackager</category>
+<attributes>
+<package>RuntimePackager</package>
+</attributes>
+</class>
+
+<class>
+<name>RuntimeBuilderUI</name>
+<environment>RuntimePackager</environment>
+<super>UI.ApplicationModel</super>
+<private>false</private>
+<indexed-type>none</indexed-type>
+<inst-vars>stepTitle stepDescription currentStepNumber options keptItems tester paramFilename memoryParams reviewDone itemsDone scanDone testDone memoryDone optionsDone cleanupDone saveParcelsDone interactWithUser </inst-vars>
+<class-inst-vars></class-inst-vars>
+<imports></imports>
+<category>RuntimePackager</category>
+<attributes>
+<package>RuntimePackager</package>
+</attributes>
+</class>
+
+</st-source>

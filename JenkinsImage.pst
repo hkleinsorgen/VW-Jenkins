@@ -1,0 +1,197 @@
+<?xml version="1.0"?>
+
+<st-source>
+<!-- 
+Name: JenkinsImage
+Notice: Licensed under the MIT license
+
+Copyright (c) 2012 Holger Kleinsorgen
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+Comment: Automated build of an image.
+
+Documentation: http://dl.dropbox.com/u/21555916/documentation/jenkins.html
+Contact: h . kleinsorgen -at- gmail . com
+Licensed under the MIT license (see Copyright)
+DbIdentifier: psql_public_cst_2007
+DbTrace: 85140
+DbUsername: klnsrgn
+DbVersion: 10
+DevelopmentPrerequisites: #(#(#any 'JenkinsAutomation' ''))
+DisregardedPrerequisites: #(#(#name 'StoreBase' #componentType #bundle))
+PackageName: JenkinsImage
+Parcel: #('JenkinsImage')
+ParcelDirectory: JenkinsImage
+ParcelName: JenkinsImage
+PrerequisiteDescriptions: #(#(#name 'JenkinsAutomation' #componentType #package))
+PrerequisiteParcels: #(#('JenkinsAutomation' ''))
+PrintStringCache: (10,klnsrgn)
+Version: 10
+Post-Load Block: 
+	[:package |
+	Jenkins.JenkinsImage postLoadBuild
+]
+Date: 10:43:30 AM December 9, 2017
+ -->
+<time-stamp>From VisualWorks®, 8.1.1 of March 10, 2016 on December 9, 2017 at 10:43:30 AM</time-stamp>
+
+
+<do-it>(Dialog confirm: 'You are filing-in a Parcel source file!\\While this is possible it will not have\the same effect as loading the parcel.\None of the Parcel''s prerequisites will\be loaded and none of its load actions\will be performed.\\Are you sure you want to file-in?' withCRs) ifFalse: [self error: 'Parcel file-in abandoned.  Choose terminate or close.']</do-it>
+
+<class>
+<name>JenkinsImage</name>
+<environment>Jenkins</environment>
+<super>Core.Object</super>
+<private>false</private>
+<indexed-type>none</indexed-type>
+<inst-vars></inst-vars>
+<class-inst-vars></class-inst-vars>
+<imports></imports>
+<category></category>
+<attributes>
+<package>JenkinsImage</package>
+</attributes>
+</class>
+
+<comment>
+<class-id>Jenkins.JenkinsImage</class-id>
+<body>Automated build of an image.</body>
+</comment>
+
+<class>
+<name>ImageBuildError</name>
+<environment>Jenkins</environment>
+<super>Core.Error</super>
+<private>false</private>
+<indexed-type>none</indexed-type>
+<inst-vars></inst-vars>
+<class-inst-vars></class-inst-vars>
+<imports></imports>
+<category></category>
+<attributes>
+<package>JenkinsImage</package>
+</attributes>
+</class>
+
+<comment>
+<class-id>Jenkins.ImageBuildError</class-id>
+<body>Error raise when the image could not be built</body>
+</comment>
+
+<methods>
+<class-id>Jenkins.JenkinsImage class</class-id> <category>configuration</category>
+
+<body package="JenkinsImage">bundleNames	" Names of bundles to load "	^ Build argumentsNamed: 'loadBundles' ifAbsent: [ #() ]</body>
+
+<body package="JenkinsImage">checkConfiguration	| vwHome |	self imageName isNil		ifTrue: [ self error: 'Image name not specified' ].	(self repositoriesFile notNil and: [ self repositoriesFile exists ])		ifFalse: [ self error: 'Repository file not found: ' , self repositoriesFile printString ].	self repositoryName isNil		ifTrue: [ self error: 'No repository defined' ].	vwHome := (PortableFilename fromComponents: #('$(VISUALWORKS)')) asResolvedString.	vwHome isEmpty		ifTrue: [ self error: 'VisualWorks directory (VISUALWORKS) not defined' ]		ifFalse: [ Build log: 'VisualWorks home: ' , vwHome ]</body>
+
+<body package="JenkinsImage">imageFilename	" Filename of the image "	^ Build workspaceDirectory construct: self imageName , '.im'</body>
+
+<body package="JenkinsImage">imageName	" Name of the final image (without extension) "	^ Build argumentNamed: 'saveAs' ifAbsent: [ nil ]</body>
+
+<body package="JenkinsImage">imagePrefixFilename	" Filename of the image (without extension) "	^ Build workspaceDirectory construct: self imageName</body>
+
+<body package="JenkinsImage">packageNames	" Names of packages to load "	^ Build argumentsNamed: 'loadPackages' ifAbsent: [ #() ]</body>
+
+<body package="JenkinsImage">parcelNames	" Names of parcels to load "	^ Build argumentsNamed: 'loadParcels' ifAbsent: [ #() ]</body>
+
+<body package="JenkinsImage">repositoriesFile	" Store repository file "	^ Build configurationDirectory construct: 'repositories.xml'</body>
+
+<body package="JenkinsImage">repositoryName	" Name of the repository where we load packages from "	^ Build environmentVariableNamed: 'VisualWorksRepository'</body>
+
+<body package="JenkinsImage">storeParcelName	" Name of the Store parcel "	^ Build environmentVariableNamed: 'VisualWorksStoreParcel'</body>
+
+<body package="JenkinsImage">testResultsFilename	" JUnit compatible test results file "	^ Build workspaceDirectory construct: self imageName , '.xml'</body>
+</methods>
+
+<methods>
+<class-id>Jenkins.JenkinsImage class</class-id> <category>building - private</category>
+
+<body package="JenkinsImage">announceBuild	Build current announce: (ReadyForTesting resultsFilename: self testResultsFilename).</body>
+
+<body package="JenkinsImage">cleanseJenkinsParcels	" Detach the Jenkins packages from the parcels they were loaded from "	#('JenkinsAutomation' 'JenkinsImage') do: 		[: jenkinsParcelName |			(Store.Registry packageNamed: jenkinsParcelName)				ifNotNil: [: pundleModel | pundleModel cleanseRelatedParcel ] 		]</body>
+
+<body package="JenkinsImage">connectToStore	" Connect to the configured repository "	| repositoryName repository |	repositoryName := self repositoryName.	repository := Store.RepositoryManager repositories				detect: [: each | each name = repositoryName ]				ifNone: [ self error: 'No repository named "' , repositoryName , '" defined' ].	Build log: 'Connecting to Store repository "' , repositoryName , '"'.	DbRegistry connectTo: repository</body>
+
+<body package="JenkinsImage">importRepositories	| stream |	Build log: 'Importing repositories'.	stream := (self repositoriesFile withEncoding: #utf8) readStream.	[ Store.RepositoryManager importRepositoriesFromStream: stream ] ensure: [ stream close ]</body>
+
+<body package="JenkinsImage">loadBundlesAndPackages	self useAutomaticLoadPolicyWhile: 		[	self loadPundles: self bundleNames ofClass: StoreBundle.			self loadPundles: self packageNames ofClass: StorePackage 		]</body>
+
+<body package="JenkinsImage">loadParcels	self parcelNames do: 		[: parcelName |			Build log: 'Loading parcel: ' , parcelName.			Parcel loadParcelByName: parcelName 		]</body>
+
+<body package="JenkinsImage">loadPundles: aListOfNames ofClass: aPundleClass	| i pundleName pundleVersion |	aListOfNames do: 		[: each | 			| pundle |			" Check if the name specifies a version pattern "			('*(*)' match: each)				ifTrue: 				[	i := each indexOf: $(.					pundleName := each copyFrom: 1 to: i - 1.					pundleVersion := each copyFrom: i + 1 to: each size - 1.					pundle := aPundleClass latestOf: pundleName version: [: version | pundleVersion match: version ].					pundle isNil						ifTrue: 						[	self error: ('&lt;1s&gt; "&lt;2s&gt;" with version &lt;3s&gt; not found'										expandMacrosWith: aPundleClass imageClass descriptionString										with: pundleName										with: pundleVersion) 						] 				]				ifFalse: 				[	pundle := aPundleClass newestVersionWithName: each.					pundle isNil						ifTrue: 						[	self error: ('&lt;1s&gt; "&lt;2s&gt;"  not found'										expandMacrosWith: aPundleClass imageClass descriptionString										with: pundleName) 						] 				].			pundle notNil				ifTrue: 				[	Build log: 'Loading ' , pundle displayString.					pundle quietlyLoadSource 				] 		]</body>
+
+<body package="JenkinsImage">loadSettings	" Load settings from exported XML files for all known domains "	| settingsFile |	SettingsDomain allDomains do: 		[: settingsDomain |			settingsFile := (settingsDomain name , '.xml') asFilename.			settingsFile exists				ifTrue: 				[	Build log: 'Loading settings from ' , settingsFile asString.					settingsDomain class readFromFile: settingsFile 				] 		]</body>
+
+<body package="JenkinsImage">loadStore	Build log: 'Loading Store parcel ', self storeParcelName.	Parcel loadParcelByName: self storeParcelName</body>
+
+<body package="JenkinsImage">quit	Build log: 'Finished nightly build'.	ObjectMemory quit</body>
+
+<body package="JenkinsImage">saveImage	Build log: 'Saving image'.	DbRegistry disconnect.	Undeclared purgeUnusedBindings.	HeadlessImage current saveHeadfull: self imagePrefixFilename asString</body>
+</methods>
+
+<methods>
+<class-id>Jenkins.JenkinsImage class</class-id> <category>private</category>
+
+<body package="JenkinsImage">shouldBuild	^ Build buildID notNil and: [ self imageName notNil ]</body>
+
+<body package="JenkinsImage">useAutomaticLoadPolicyWhile: aBlock	" use a policy that does not ask questions while loading prerequisites "	| oldPolicy automaticPolicy |	oldPolicy := Policies prerequisitePolicy.	automaticPolicy := oldPolicy copy.	automaticPolicy versionSelection: #latest.	automaticPolicy searchOrder: #pundlesFirst.	Policies prerequisitePolicy: automaticPolicy.	^ aBlock ensure: [ Policies prerequisitePolicy: oldPolicy ]</body>
+</methods>
+
+<methods>
+<class-id>Jenkins.JenkinsImage class</class-id> <category>signal constants</category>
+
+<body package="JenkinsImage">errorSignal	^ImageBuildError</body>
+</methods>
+
+<methods>
+<class-id>Jenkins.JenkinsImage class</class-id> <category>building</category>
+
+<body package="JenkinsImage">build	| notifier |	self checkConfiguration.	self loadStore.	self importRepositories.	self connectToStore.	self loadParcels.	self loadBundlesAndPackages.	self loadSettings.	self cleanseJenkinsParcels.	notifier := Notifier current.	" don't want to save a development image with the headless image as notifier "	Notifier beDevelopment.	self saveImage.	" the saved image will continue here "	self shouldBuild		ifTrue: 		[	Notifier current: notifier.			self announceBuild.			self quit 		]</body>
+</methods>
+
+<methods>
+<class-id>Jenkins.JenkinsImage class</class-id> <category>initialize-release</category>
+
+<body package="JenkinsImage">postLoadBuild	self shouldBuild		ifTrue: 		[	" detach build from post load machinery "			[	[	" ugly way to wait until ImageConfigurationSystem has finished loading all parcels "					100 milliseconds wait.					ImageConfigurationSystem isActive 				] whileFalse.				self build 			] fork				name: 'Build image' 		]</body>
+</methods>
+
+<do-it>"Imported Classes:"</do-it>
+
+<do-it>self error: 'Attempting to file-in parcel imports.  Choose terminate or close'</do-it>
+
+<class>
+<name>Object</name>
+<environment>Core</environment>
+<super></super>
+<private>false</private>
+<indexed-type>none</indexed-type>
+<inst-vars></inst-vars>
+<class-inst-vars></class-inst-vars>
+<imports></imports>
+<category>Kernel-Objects</category>
+<attributes>
+<package>Kernel-Objects</package>
+</attributes>
+</class>
+
+<class>
+<name>Error</name>
+<environment>Core</environment>
+<super>Core.Exception</super>
+<private>false</private>
+<indexed-type>none</indexed-type>
+<inst-vars></inst-vars>
+<class-inst-vars></class-inst-vars>
+<imports></imports>
+<category>Kernel-Exception Handling</category>
+<attributes>
+<package>Kernel-Exception Handling</package>
+</attributes>
+</class>
+
+</st-source>

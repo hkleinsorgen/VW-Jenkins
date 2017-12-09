@@ -1,0 +1,174 @@
+<?xml version="1.0"?>
+
+<st-source>
+<!-- 
+Name: JenkinsAutomation
+Notice: Licensed under the MIT license
+
+Copyright (c) 2012 Holger Kleinsorgen
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+Comment: Base classes for automating builds with Jenkins CI
+
+Documentation: http://dl.dropbox.com/u/21555916/documentation/jenkins.html
+Contact: h . kleinsorgen -at- gmail . com
+
+DbIdentifier: psql_public_cst_2007
+DbTrace: 84590
+DbUsername: klnsrgn
+DbVersion: 4
+PackageName: JenkinsAutomation
+Parcel: #('JenkinsAutomation')
+ParcelDirectory: JenkinsAutomation
+PrintStringCache: (4,klnsrgn)
+Version: 4
+Date: 10:43:22 AM December 9, 2017
+ -->
+<time-stamp>From VisualWorks®, 8.1.1 of March 10, 2016 on December 9, 2017 at 10:43:22 AM</time-stamp>
+
+
+<do-it>(Dialog confirm: 'You are filing-in a Parcel source file!\\While this is possible it will not have\the same effect as loading the parcel.\None of the Parcel''s prerequisites will\be loaded and none of its load actions\will be performed.\\Are you sure you want to file-in?' withCRs) ifFalse: [self error: 'Parcel file-in abandoned.  Choose terminate or close.']</do-it>
+
+<name-space>
+<name>Jenkins</name>
+<environment>Smalltalk</environment>
+<private>false</private>
+<imports>
+			private SUnit.*
+			private Store.Glorp.*
+			private Store.*
+			private Smalltalk.*
+			</imports>
+<category></category>
+<attributes>
+<package>JenkinsAutomation</package>
+</attributes>
+</name-space>
+
+<class>
+<name>Build</name>
+<environment>Jenkins</environment>
+<super>Core.Announcer</super>
+<private>false</private>
+<indexed-type>none</indexed-type>
+<inst-vars></inst-vars>
+<class-inst-vars>current </class-inst-vars>
+<imports></imports>
+<category></category>
+<attributes>
+<package>JenkinsAutomation</package>
+</attributes>
+</class>
+
+<comment>
+<class-id>Jenkins.Build</class-id>
+<body>Represents a build triggered by Jenkins</body>
+</comment>
+
+<class>
+<name>ReadyForTesting</name>
+<environment>Jenkins</environment>
+<super>Core.Announcement</super>
+<private>false</private>
+<indexed-type>none</indexed-type>
+<inst-vars>imageFilename resultsFilename </inst-vars>
+<class-inst-vars></class-inst-vars>
+<imports></imports>
+<category></category>
+<attributes>
+<package>JenkinsAutomation</package>
+</attributes>
+</class>
+
+<comment>
+<class-id>Jenkins.ReadyForTesting</class-id>
+<body>ReadyForTesting is announced when an image is ready for testingInstance Variables	resultsFilename	&lt;Filename&gt;	Name of the test results file</body>
+</comment>
+
+<methods>
+<class-id>Jenkins.Build class</class-id> <category>logging</category>
+
+<body package="JenkinsAutomation">log: aString	Transcript		show: '[' , Time now printString , '] ' , aString;		cr</body>
+</methods>
+
+<methods>
+<class-id>Jenkins.Build class</class-id> <category>configuration</category>
+
+<body package="JenkinsAutomation">buildID	" ID of the build "	^ self environmentVariableNamed: 'BUILD_ID'</body>
+
+<body package="JenkinsAutomation">configurationDirectory	" Directory of all configuration files "	^ (self environmentVariableNamed: 'VisualWorksConfigurationDirectory')		ifNotNil: [: directory | directory asFilename ]</body>
+
+<body package="JenkinsAutomation">workspaceDirectory	" Jenkins workspace directory "	^ (self environmentVariableNamed: 'WORKSPACE') ifNotNil: [: directory | directory asFilename ]</body>
+</methods>
+
+<methods>
+<class-id>Jenkins.Build class</class-id> <category>private</category>
+
+<body package="JenkinsAutomation">argumentNamed: aString ifAbsent: absentBlock	" argument of the command line option, or the result of absentBlock if not specified "	| arguments |	arguments := self argumentsNamed: aString ifAbsent: [ #() ].	^ arguments size &gt;= 1		ifTrue: [ arguments first ]		ifFalse: [ absentBlock value ]</body>
+
+<body package="JenkinsAutomation">argumentsNamed: aString ifAbsent: absentBlock	" arguments of the command line option, or the result of absentBlock if not specified.	can't use a Subsystem, because subsystems are not activated after loading a parcel containing a new subsystem "	| commandLineStream |	commandLineStream := CEnvironment commandLine readStream.	[ commandLineStream atEnd ] whileFalse: 		[	commandLineStream next = ('-' , aString)				ifTrue: [ ^ CommandLineInterest argumentsFrom: commandLineStream ] 		].	^ absentBlock value</body>
+
+<body package="JenkinsAutomation">environmentVariableNamed: aString	" returns the value of the environment variable, or nil if undefined "	| value |	value := CEnvironment getenv: aString.	^ (value notNil and: [ value notEmpty ])		ifTrue: [ value ]		ifFalse: [ nil ]</body>
+</methods>
+
+<methods>
+<class-id>Jenkins.Build class</class-id> <category>instance creation</category>
+
+<body package="JenkinsAutomation">current	current isNil		ifTrue: [ current := self new ].	^ current</body>
+
+<body package="JenkinsAutomation">flush	current := nil</body>
+</methods>
+
+<methods>
+<class-id>Jenkins.ReadyForTesting</class-id> <category>accessing</category>
+
+<body package="JenkinsAutomation">resultsFilename	^ resultsFilename</body>
+
+<body package="JenkinsAutomation">resultsFilename: aFilename	resultsFilename := aFilename</body>
+</methods>
+
+<methods>
+<class-id>Jenkins.ReadyForTesting class</class-id> <category>instance creation</category>
+
+<body package="JenkinsAutomation">resultsFilename: aResultsFilename	^ (self new)		resultsFilename: aResultsFilename;		yourself</body>
+</methods>
+
+<do-it>"Imported Classes:"</do-it>
+
+<do-it>self error: 'Attempting to file-in parcel imports.  Choose terminate or close'</do-it>
+
+<class>
+<name>Announcer</name>
+<environment>Core</environment>
+<super>Core.Object</super>
+<private>false</private>
+<indexed-type>none</indexed-type>
+<inst-vars>subscriptionRegistry </inst-vars>
+<class-inst-vars></class-inst-vars>
+<imports></imports>
+<category>Model-Observables</category>
+<attributes>
+<package>System-Announcements</package>
+</attributes>
+</class>
+
+<class>
+<name>Announcement</name>
+<environment>Core</environment>
+<super>Core.Object</super>
+<private>false</private>
+<indexed-type>none</indexed-type>
+<inst-vars></inst-vars>
+<class-inst-vars></class-inst-vars>
+<imports></imports>
+<category>System-Announcements</category>
+<attributes>
+<package>System-Announcements</package>
+</attributes>
+</class>
+
+</st-source>

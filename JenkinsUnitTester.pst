@@ -1,0 +1,311 @@
+<?xml version="1.0"?>
+
+<st-source>
+<!-- 
+Name: JenkinsUnitTester
+Notice: Licensed under the MIT license
+
+Copyright (c) 2012 Holger Kleinsorgen
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+Comment: Runs SUnitToo tests and saves a JUnit compatible result file.
+
+Documentation: http://dl.dropbox.com/u/21555916/documentation/jenkins.html
+Contact: h . kleinsorgen -at- gmail . com
+
+DbIdentifier: psql_public_cst_2007
+DbTrace: 84594
+DbUsername: klnsrgn
+DbVersion: 6
+DevelopmentPrerequisites: #(#(#any 'SUnitToo' '') #(#any 'JenkinsAutomation' ''))
+PackageName: JenkinsUnitTester
+Parcel: #('JenkinsUnitTester')
+ParcelDirectory: JenkinsUnitTester
+PrerequisiteDescriptions: #(#(#name 'SUnitToo' #componentType #package) #(#name 'JenkinsAutomation' #componentType #package))
+PrerequisiteParcels: #(#('SUnitToo' '') #('JenkinsAutomation' ''))
+PrintStringCache: (6,klnsrgn)
+Version: 6
+Post-Load Block: 
+	[:package |
+	Jenkins.TestRun postLoadRun.
+]
+Date: 10:43:43 AM December 9, 2017
+ -->
+<time-stamp>From VisualWorks®, 8.1.1 of March 10, 2016 on December 9, 2017 at 10:43:43 AM</time-stamp>
+
+
+<do-it>(Dialog confirm: 'You are filing-in a Parcel source file!\\While this is possible it will not have\the same effect as loading the parcel.\None of the Parcel''s prerequisites will\be loaded and none of its load actions\will be performed.\\Are you sure you want to file-in?' withCRs) ifFalse: [self error: 'Parcel file-in abandoned.  Choose terminate or close.']</do-it>
+
+<class>
+<name>TestResultWriter</name>
+<environment>Jenkins</environment>
+<super>XML.SAXWriter</super>
+<private>false</private>
+<indexed-type>none</indexed-type>
+<inst-vars></inst-vars>
+<class-inst-vars></class-inst-vars>
+<imports></imports>
+<category></category>
+<attributes>
+<package>JenkinsUnitTester</package>
+</attributes>
+</class>
+
+<comment>
+<class-id>Jenkins.TestResultWriter</class-id>
+<body>XML writer for test case results</body>
+</comment>
+
+<class>
+<name>TestRun</name>
+<environment>Jenkins</environment>
+<super>Core.Object</super>
+<private>false</private>
+<indexed-type>none</indexed-type>
+<inst-vars>timeout resultWriter resultsFilename </inst-vars>
+<class-inst-vars></class-inst-vars>
+<imports></imports>
+<category></category>
+<attributes>
+<package>JenkinsUnitTester</package>
+</attributes>
+</class>
+
+<comment>
+<class-id>Jenkins.TestRun</class-id>
+<body>Single test run. Saves the result in a JUnit compatible XML file.Instance Variables	resultsFilename	&lt;Filename&gt;	JUnit compatible XML file	resultWriter	&lt;TestResultWriter&gt;	XML writer	timeout	&lt;Duration&gt;	Test case timeout</body>
+</comment>
+
+<methods>
+<class-id>Jenkins.TestResultWriter</class-id> <category>content handler</category>
+
+<body package="JenkinsUnitTester">characters: aString	self		characters: aString		from: 1		to: aString size</body>
+
+<body package="JenkinsUnitTester">element: localName attributes: attributes do: aBlock	self		privateElement: localName		attributes: attributes		do: 		[	self cr.			aBlock value 		].	self cr</body>
+
+<body package="JenkinsUnitTester">element: localName characters: aString	self		privateElement: localName		attributes: #()		do: [ self characters: aString ].	self cr</body>
+
+<body package="JenkinsUnitTester">element: localName do: aBlock	self		element: localName		attributes: #()		do: aBlock</body>
+</methods>
+
+<methods>
+<class-id>Jenkins.TestResultWriter</class-id> <category>private</category>
+
+<body package="JenkinsUnitTester">cr	self characters: ''</body>
+
+<body package="JenkinsUnitTester">privateElement: localName attributes: attributes do: aBlock	self		startElement: ''		localName: ''		qName: localName		attributes: attributes.	aBlock ensure: 		[	self				endElement: ''				localName: ''				qName: localName 		]</body>
+</methods>
+
+<methods>
+<class-id>Jenkins.TestResultWriter</class-id> <category>test result writing</category>
+
+<body package="JenkinsUnitTester">writeExceptionDescription: anException	" add an exception description including a stack dump to the XML file "	| attributes |	attributes := OrderedCollection new.	attributes add: (XML.Attribute name: 'type' value: 'error').	attributes add: (XML.Attribute name: 'message' value: anException description).	self		element: 'error'		attributes: attributes		do: 		[	self characters: anException description.			self characters: (String with: Character cr).			self characters: anException initialContext printStack 		]</body>
+
+<body package="JenkinsUnitTester">writeFailureDescription: aString	" add a failure description to the XML file "	| attributes lineBreakIndex message |	attributes := OrderedCollection new.	attributes add: (XML.Attribute name: 'type' value: 'failure').	lineBreakIndex := aString indexOf: Character cr ifAbsent: [ 0 ].	" the message should be short, so reduce multi-line content "	message := lineBreakIndex &gt; 0				ifTrue: [ (aString copyFrom: 1 to: lineBreakIndex) , '...' ]				ifFalse: [ aString ].	attributes add: (XML.Attribute name: 'message' value: message).	self		element: 'failure'		attributes: attributes		do: [ self characters: aString ]</body>
+
+<body package="JenkinsUnitTester">writeTestCaseNamed: aTestName selector: aTestSelector do: aBlock	| attributes |	attributes := OrderedCollection new.	attributes add: (XML.Attribute name: 'classname' value: aTestName).	attributes add: (XML.Attribute name: 'name' value: aTestSelector asString).	self 		element: 'testcase'		attributes: attributes		do: aBlock</body>
+
+<body package="JenkinsUnitTester">writeTestSuiteDo: aBlock	self element: 'testsuite' do: aBlock</body>
+</methods>
+
+<methods>
+<class-id>Jenkins.TestRun</class-id> <category>accessing</category>
+
+<body package="JenkinsUnitTester">resultsFilename	^ resultsFilename</body>
+
+<body package="JenkinsUnitTester">resultsFilename: aStringOrFilename	resultsFilename := aStringOrFilename</body>
+
+<body package="JenkinsUnitTester">timeout	" a test is reagarded as failure if it takes longer to run "	^ timeout ifNil: [ 60 seconds ]</body>
+
+<body package="JenkinsUnitTester">timeout: aDuration	" a test is reagarded as failure if it takes longer to run "	timeout := aDuration</body>
+</methods>
+
+<methods>
+<class-id>Jenkins.TestRun</class-id> <category>events</category>
+
+<body package="JenkinsUnitTester">noteError: anErrorResult	" a test has raised error "	self resultWriter writeExceptionDescription: anErrorResult exception</body>
+
+<body package="JenkinsUnitTester">noteFailure: aFailure	" an test has failed "	self resultWriter writeFailureDescription: aFailure exception description</body>
+
+<body package="JenkinsUnitTester">notePass: aPass	" a test has passed "</body>
+
+<body package="JenkinsUnitTester">noteTimeoutOf: aTest	" a test did not finish "	self resultWriter writeFailureDescription: 'Test did not finish within ' , self timeout printString</body>
+
+<body package="JenkinsUnitTester">noteUnhandledException: anException	" an error was not handled by SUnitToo	The error is not bound to a test case, so we're cheating here by inventing a test case "	self resultWriter		writeTestCaseNamed: TestSuite jenkinsJUnitClassName		selector: #run		do: [ self resultWriter writeExceptionDescription: anException ].</body>
+</methods>
+
+<methods>
+<class-id>Jenkins.TestRun</class-id> <category>XML writing - private</category>
+
+<body package="JenkinsUnitTester">openResultWriterWhile: aBlock	| stream |	self resultsFilename isNil		ifTrue: [ self error: 'No filename has been specified' ].	stream := (self resultsFilename asFilename withEncoding: #utf8) writeStream.	resultWriter := TestResultWriter new.	resultWriter output: stream.	^ [	resultWriter startDocument.		resultWriter processingInstruction: 'xml' data: 'version="1.0" encoding="UTF-8"'.		resultWriter characters: '\\' withCRs.		aBlock ensure: [ resultWriter endDocument ] 	] ensure: [ stream close ]</body>
+
+<body package="JenkinsUnitTester">resultWriter	" Test result SAX writer "	^ resultWriter</body>
+</methods>
+
+<methods>
+<class-id>Jenkins.TestRun</class-id> <category>running</category>
+
+<body package="JenkinsUnitTester">runAllAvailableTests	" Run all available tests "	self runTestClasses: TestCase allSubclasses</body>
+
+<body package="JenkinsUnitTester">runSuite: aTestSuite	" Run all tests of the suite. Write all test results to a XML file "	Build log: 'Running tests'.	self openResultWriterWhile: 		[	self subscribeToTestResultsWhile: 				[	self resultWriter writeTestSuiteDo: 						[	[ aTestSuite runUsing: [: each | self runAndNoteTest: each ] ]								on: Error								do: [: ex | self noteUnhandledException: ex ] 						] 				] 		].	Build log: 'All tests run'</body>
+
+<body package="JenkinsUnitTester">runTestClasses: aCollectionOfTestClasses	" Run all tests "	| suite |	suite := TestSuite new.	suite addClasses: aCollectionOfTestClasses.	self runSuite: suite</body>
+</methods>
+
+<methods>
+<class-id>Jenkins.TestRun</class-id> <category>running - private</category>
+
+<body package="JenkinsUnitTester">logRunningTest: aTestCase	Build log: aTestCase class fullName , '&gt;&gt;' , aTestCase selector</body>
+
+<body package="JenkinsUnitTester">runAndNoteTest: aTestCase	self logRunningTest: aTestCase.	self resultWriter		writeTestCaseNamed: aTestCase class jenkinsJUnitClassName		selector: aTestCase selector		do: [ self timeout toFinish: [ aTestCase run ] orElse: [ self noteTimeoutOf: aTestCase ] ]</body>
+
+<body package="JenkinsUnitTester">subscribeToTestResultsWhile: aBlock	TestCase		when: Failure		do: [: failure | self noteFailure: failure ]		for: self.	TestCase		when: SomeError		do: [: error | self noteError: error ]		for: self.	TestCase		when: Pass		do: [: pass | self notePass: pass ]		for: self.	aBlock ensure: [ TestCase unsubscribe: self ]</body>
+</methods>
+
+<methods>
+<class-id>Jenkins.TestRun class</class-id> <category>accessing</category>
+
+<body package="JenkinsUnitTester">listenToAnnouncements	Build current		when: ReadyForTesting		do: [: readyForTesting | (self resultsFilename: readyForTesting resultsFilename) runAllAvailableTests ]		for: self</body>
+</methods>
+
+<methods>
+<class-id>Jenkins.TestRun class</class-id> <category>instance creation</category>
+
+<body package="JenkinsUnitTester">resultsFilename: aStringOrFilename	^ (self new)		resultsFilename: aStringOrFilename;		yourself</body>
+</methods>
+
+<methods>
+<class-id>Jenkins.TestRun class</class-id> <category>configuration</category>
+
+<body package="JenkinsUnitTester">testResultsFilename	^ (Build argumentNamed: 'test' ifAbsent: [ nil ])		ifNotNil: [: testResultsFilename | testResultsFilename asFilename ]</body>
+</methods>
+
+<methods>
+<class-id>Jenkins.TestRun class</class-id> <category>initialize-release</category>
+
+<body package="JenkinsUnitTester">postLoadRun	" run all tests when triggered "	" listen to build announcements "	self listenToAnnouncements.	" run now if a results file is specified  "	self testResultsFilename ifNotNil: [ : testResultsFilename | 		(self resultsFilename: testResultsFilename) runAllAvailableTests.		ObjectMemory quit.	]</body>
+</methods>
+
+<methods>
+<class-id>Core.Metaclass</class-id> <category>accessing</category>
+
+<body package="JenkinsUnitTester">jenkinsJUnitClassName	^ self soleInstance jenkinsJUnitClassName , '.class'</body>
+</methods>
+
+<methods>
+<class-id>Core.Class</class-id> <category>accessing</category>
+
+<body package="JenkinsUnitTester">jenkinsJUnitClassName	" Jenkins likes dotted names "	^ self environment = Smalltalk		ifTrue: [ 'Smalltalk.' , self fullName ]		ifFalse: [ self fullName ]</body>
+</methods>
+
+<methods>
+<class-id>Core.ClassDescription</class-id> <category>accessing</category>
+
+<body package="JenkinsUnitTester">jenkinsJUnitClassName	" returns the name of the class in the format preferred by Jenkins"	^ self subclassResponsibility</body>
+</methods>
+
+<methods>
+<class-id>SUnit.TestSuite</class-id> <category>accessing</category>
+
+<body package="JenkinsUnitTester">addClasses: aCollectionOfTestCaseClasses	" Add all available tests "	aCollectionOfTestCaseClasses do: 		[: testClass |			(testClass isTestCase and: [ testClass isAbstract not ])				ifTrue: [ testClass testSelectorsDo: [: selector | self addTest: (testClass selector: selector) ] ] 		]</body>
+</methods>
+
+<do-it>"Imported Classes:"</do-it>
+
+<do-it>self error: 'Attempting to file-in parcel imports.  Choose terminate or close'</do-it>
+
+<class>
+<name>Object</name>
+<environment>Core</environment>
+<super></super>
+<private>false</private>
+<indexed-type>none</indexed-type>
+<inst-vars></inst-vars>
+<class-inst-vars></class-inst-vars>
+<imports></imports>
+<category>Kernel-Objects</category>
+<attributes>
+<package>Kernel-Objects</package>
+</attributes>
+</class>
+
+<class>
+<name>ClassDescription</name>
+<environment>Core</environment>
+<super>Core.Behavior</super>
+<private>false</private>
+<indexed-type>none</indexed-type>
+<inst-vars>instanceVariables organization </inst-vars>
+<class-inst-vars></class-inst-vars>
+<imports></imports>
+<category>Kernel-Classes</category>
+<attributes>
+<package>Kernel-Classes</package>
+</attributes>
+</class>
+
+<class>
+<name>Metaclass</name>
+<environment>Core</environment>
+<super>Core.ClassDescription</super>
+<private>false</private>
+<indexed-type>none</indexed-type>
+<inst-vars>thisClass </inst-vars>
+<class-inst-vars></class-inst-vars>
+<imports></imports>
+<category>Kernel-Classes</category>
+<attributes>
+<package>Kernel-Classes</package>
+</attributes>
+</class>
+
+<class>
+<name>TestSuite</name>
+<environment>SUnit</environment>
+<super>Core.Object</super>
+<private>false</private>
+<indexed-type>none</indexed-type>
+<inst-vars>resourceAndDefinitions </inst-vars>
+<class-inst-vars>random </class-inst-vars>
+<imports></imports>
+<category>SUnit</category>
+<attributes>
+<package>SUnitToo</package>
+</attributes>
+</class>
+
+<class>
+<name>SAXWriter</name>
+<environment>XML</environment>
+<super>XML.SAXDriver</super>
+<private>false</private>
+<indexed-type>none</indexed-type>
+<inst-vars>output textMap attrMap hasOpenTag normalizeText notations newNamespaces </inst-vars>
+<class-inst-vars></class-inst-vars>
+<imports></imports>
+<category>XML-SAX</category>
+<attributes>
+<package>XML</package>
+</attributes>
+</class>
+
+<class>
+<name>Class</name>
+<environment>Core</environment>
+<super>Core.ClassDescription</super>
+<private>false</private>
+<indexed-type>none</indexed-type>
+<inst-vars>name classPool environment </inst-vars>
+<class-inst-vars></class-inst-vars>
+<imports></imports>
+<category>Kernel-Classes</category>
+<attributes>
+<package>Kernel-Classes</package>
+</attributes>
+</class>
+
+</st-source>
