@@ -53,7 +53,7 @@ JenkinsImage automatically loads settings of all available settings domains if t
 
 ### Unit tests
 
-To run test cases and see the test results in Jenkins, you need to load the package `JenkinsUnitTester`. Simply add it to the list of packages to load (if you have published it in your repository), or load it as parcel via -pcl (it must appear before "JenkinsImage").
+To run SUnitToo test cases  and see the test results in Jenkins, you need to load the package `JenkinsUnitTester`. Simply add it to the list of packages to load (if you have published it in your repository), or load it as parcel via -pcl (it must appear before "JenkinsImage").
 
 JenkinsUnitTester performs all SUnitToo tests that are loaded in the image. The test results will be saved as a JUnit compatible file named {imageName}.xml in the workspace directory.
 
